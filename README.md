@@ -6,7 +6,7 @@ gcc/nasm/qemu+gdb/makefile
 
 
 
-系统环境：
+开发环境：
 Ubuntu 16.04 32bit.
 
 
