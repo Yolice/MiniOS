@@ -9,7 +9,7 @@ Ubuntu 16.04 32bit.
 
 关于实现：
 
-利用Grub完成bootloader进入保护模式
+利用Grub完成bootloader进入保护模式\n
 VGA的字符显示编程
 GDT表的初始化
 IDT表的初始化
