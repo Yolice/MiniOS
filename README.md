@@ -1,4 +1,4 @@
-# MiniOS
+# MiniOS （图一乐OS）
 此操作系统内核基于hurlex的教程制作：http://wiki.0xffffff.org/
 
 工具：
