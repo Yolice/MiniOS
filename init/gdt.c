@@ -1,44 +1,44 @@
 #include "gdt.h"
 #include "string.h"
 
-#define GDT_LENGTH 5 //ÏÈ³õÊ¼»¯5¸ö¶ÎÃèÊö·û
+#define GDT_LENGTH 5 //å…ˆåˆå§‹åŒ–5ä¸ªæ®µæè¿°ç¬¦
 
 
-gdt_struct global_describe_table[GDT_LENGTH];  //gdt±íÊÇÒ»¸öÊı×é£¬Ã¿¸öÊı×éµÄÔªËØ¶¼ÊÇÒ»¸öÃèÊö·ûµÄ½á¹¹Ìå
-gdtr gdt_register; //ÓÃÓÚ¼ÓÔØgdtr¼Ä´æÆ÷µÄ48Î»½á¹¹Ìå
+gdt_struct global_describe_table[GDT_LENGTH];  //gdtè¡¨æ˜¯ä¸€ä¸ªæ•°ç»„ï¼Œæ¯ä¸ªæ•°ç»„çš„å…ƒç´ éƒ½æ˜¯ä¸€ä¸ªæè¿°ç¬¦çš„ç»“æ„ä½“
+gdtr gdt_register; //ç”¨äºåŠ è½½gdtrå¯„å­˜å™¨çš„48ä½ç»“æ„ä½“
 
 
-//×¢²áÃèÊö·ûÔÚgdt±íÀïµÄÍ¨ÓÃº¯Êı
-static void gdt_initialize(int32_t indexs,uint32_t base,uint32_t limit,uint8_t access_right,uint8_t gran); //µÚÒ»¸öÊÇÃèÊö·ûµÄÆ«ÒÆÖµ£¬ÆäËûËÄ¸öÊÇ¸ù¾İGDT±í¶¨ÒåÀïµÄ¶Î»ùÖ·£¬¶Î½çÏŞ£¬·ÃÎÊÌØÈ¨£¬Á£¶ÈµÈµÈ¡£
+//æ³¨å†Œæè¿°ç¬¦åœ¨gdtè¡¨é‡Œçš„é€šç”¨å‡½æ•°
+static void gdt_initialize(int32_t indexs,uint32_t base,uint32_t limit,uint8_t access_right,uint8_t gran); //ç¬¬ä¸€ä¸ªæ˜¯æè¿°ç¬¦çš„åç§»å€¼ï¼Œå…¶ä»–å››ä¸ªæ˜¯æ ¹æ®GDTè¡¨å®šä¹‰é‡Œçš„æ®µåŸºå€ï¼Œæ®µç•Œé™ï¼Œè®¿é—®ç‰¹æƒï¼Œç²’åº¦ç­‰ç­‰ã€‚
 
 extern uint32_t stack;
 
 void init_gdt()
 {
-    //ÏÈ³õÊ¼»¯gdtr½á¹¹Ìå£¬Ò»»áÓÃÓÚload gdtÓÃ
-    gdt_register.limit=sizeof(gdt_struct)*GDT_LENGTH-1;  //½²¶ÎÃèÊö·û±íµÄ´óĞ¡Ğ´Èëgdtr½á¹¹£¬(µ¥¸ö¶ÎÃèÊö·û´óĞ¡)*(¶ÎÃèÊö·û¸öÊı)=¶ÎÃèÊö·û±í½çÏŞ(´óĞ¡)
-    gdt_register.base=(uint32_t)&global_describe_table; //global_describe_tableÊÇÒ»¸ö¶ÎÃèÊö·û½á¹¹ÌåÀàĞÍÊı×é£¬Õâ¸öÊı×éµØÖ·ÓÖcÓïÑÔ·ÖÅä£¬Ëû¾ÍÊÇgdt±í£¬¶ÔÆäÈ¡µØÖ·²Ù×÷µÃµ½gdt±íµÄÄÚ´æµØÖ·
+    //å…ˆåˆå§‹åŒ–gdtrç»“æ„ä½“ï¼Œä¸€ä¼šç”¨äºload gdtç”¨
+    gdt_register.limit=sizeof(gdt_struct)*GDT_LENGTH-1;  //è®²æ®µæè¿°ç¬¦è¡¨çš„å¤§å°å†™å…¥gdtrç»“æ„ï¼Œ(å•ä¸ªæ®µæè¿°ç¬¦å¤§å°)*(æ®µæè¿°ç¬¦ä¸ªæ•°)=æ®µæè¿°ç¬¦è¡¨ç•Œé™(å¤§å°)
+    gdt_register.base=(uint32_t)&global_describe_table; //global_describe_tableæ˜¯ä¸€ä¸ªæ®µæè¿°ç¬¦ç»“æ„ä½“ç±»å‹æ•°ç»„ï¼Œè¿™ä¸ªæ•°ç»„åœ°å€åˆcè¯­è¨€åˆ†é…ï¼Œä»–å°±æ˜¯gdtè¡¨ï¼Œå¯¹å…¶å–åœ°å€æ“ä½œå¾—åˆ°gdtè¡¨çš„å†…å­˜åœ°å€
 
-    //ÔÙ³õÊ¼»¯¶ÎÃèÊö±íÀïÃ¿¸ö¶ÎÃèÊö·û
-    gdt_initialize(0,0,0,0,0); //intel¹æ¶¨ÔÚµÚ0¸ö¿ªÊ¼±ØĞëÊÇ¸ö¿ÕµÄ¶ÎÃèÊö·û
-    gdt_initialize(1, 0, 0xFFFFFFFF, 0x9A, 0xCF);     // Ö¸Áî¶ÎÃèÊö·û
-    gdt_initialize(2, 0, 0xFFFFFFFF, 0x92, 0xCF);     // Êı¾İ¶ÎÃèÊö·û
-    gdt_initialize(3, 0, 0xFFFFFFFF, 0xFA, 0xCF);     // ÓÃ»§Ä£Ê½´úÂë¶ÎÃèÊö·û
-    gdt_initialize(4, 0, 0xFFFFFFFF, 0xF2, 0xCF);     // ÓÃ»§Ä£Ê½Êı¾İ¶ÎÃèÊö·û
+    //å†åˆå§‹åŒ–æ®µæè¿°è¡¨é‡Œæ¯ä¸ªæ®µæè¿°ç¬¦
+    gdt_initialize(0,0,0,0,0); //intelè§„å®šåœ¨ç¬¬0ä¸ªå¼€å§‹å¿…é¡»æ˜¯ä¸ªç©ºçš„æ®µæè¿°ç¬¦
+    gdt_initialize(1, 0, 0xFFFFFFFF, 0x9A, 0xCF);     // æŒ‡ä»¤æ®µæè¿°ç¬¦
+    gdt_initialize(2, 0, 0xFFFFFFFF, 0x92, 0xCF);     // æ•°æ®æ®µæè¿°ç¬¦
+    gdt_initialize(3, 0, 0xFFFFFFFF, 0xFA, 0xCF);     // ç”¨æˆ·æ¨¡å¼ä»£ç æ®µæè¿°ç¬¦
+    gdt_initialize(4, 0, 0xFFFFFFFF, 0xF2, 0xCF);     // ç”¨æˆ·æ¨¡å¼æ•°æ®æ®µæè¿°ç¬¦
 
-    //¼ÓÔØgdt±íµ½gdtr¼Ä´æÆ÷
-    gdt_flush((uint32_t)&gdt_register);  //ÀûÓÃ´Ë½á¹¹ÌåĞÅÏ¢³õÊ¼»¯gdtr¼Ä´æÆ÷ 
+    //åŠ è½½gdtè¡¨åˆ°gdtrå¯„å­˜å™¨
+    gdt_flush((uint32_t)&gdt_register);  //åˆ©ç”¨æ­¤ç»“æ„ä½“ä¿¡æ¯åˆå§‹åŒ–gdtrå¯„å­˜å™¨ 
     put_str("gdt_initial Done\n");
 }
 
 
-static void gdt_initialize(int32_t indexs,uint32_t base,uint32_t limit,uint8_t access_right,uint8_t gran)  //Î¨Ò»Òª×¢ÒâµÄÊÇgranularity²ÎÊı¼ÈÓĞÃÜ¶È£¬avlµÈ4Î»²ÎÊı£¬Ò²ÓĞ4Î»µÄ¶Î½çÏŞÖµ´¢´æ
+static void gdt_initialize(int32_t indexs,uint32_t base,uint32_t limit,uint8_t access_right,uint8_t gran)  //å”¯ä¸€è¦æ³¨æ„çš„æ˜¯granularityå‚æ•°æ—¢æœ‰å¯†åº¦ï¼Œavlç­‰4ä½å‚æ•°ï¼Œä¹Ÿæœ‰4ä½çš„æ®µç•Œé™å€¼å‚¨å­˜
 {
-	global_describe_table[indexs].base_low     = (base & 0xFFFF);   //¶Î»ùÖ·µÄµÍ16Î»Âß¼­Óë£¬ÆäËûÎ»È«²¿ÇåÁã
-    global_describe_table[indexs].base_middle  = (base >> 16) & 0xFF; //baseÏÈÓÒÆ«ÒÆ°ÑµÍ16È¥µô£¬ÔÙÂß¼­Óë8Î»£¬µÃµ½¶Î»ùÖ·µÄÖĞ¼ä8Î»
-    global_describe_table[indexs].base_high    = (base >> 24) & 0xFF; //baseÏÈÓÒÆ«ÒÆ°ÑµÍ24Î»È¥µô£¬ÔÙÂß¼­Óë8Î»£¬µÃµ½¶Î»ùÖ·µÄ¸ß8Î»£¬ÖÁ´ËÍê³ÉÁË32Î»¶Î»ùÖ·µÄ³õÊ¼»¯
-    global_describe_table[indexs].limit_low    = (limit & 0xFFFF);  //¶Î½çÏŞµÍ16Î»±£Áô£¬ÆäËûÎ»È«²¿ÇåÁã
-    global_describe_table[indexs].granularity  = (limit >> 16) & 0x0F; //gran²ÎÊıÀïµÍ4Î»´¢´æÊÇ¶Î½çÏŞÊ£ÏÂ4Î»£¬ÏÖÔÚ¶Î½çÏŞ°ÑµÍ16Î»¸øÓÒÆ«ÒÆÈ¥µô£¬Ê£ÏÂ4Î»´¢´æÔÙgranularityµÄµÍ4Î»Àï
-    global_describe_table[indexs].granularity |= gran & 0xF0; //Ö»È¡gran²ÎÊıÀïµÄ¸ß4Î»£¬ÒòÎª¸ß4Î»ÊÇgranularityÒªÓÃµÄÖµ£¬µÍ4Î»ÊÇ¸Õ¸Õ¸ø¶Î½çÏŞÓÃµÄ
-    global_describe_table[indexs].access       = access_right; //×îºó°Ñ8Î»µÄ(p,dpl,tpyeµÈ×Ö¶Î)¸³Óè¸øaccess¶Î£¬ÖÁ´Ëgdt±í½á¹¹¸³Óè¹æÔò¹¹ÔìÍê±Ï
+    global_describe_table[indexs].base_low     = (base & 0xFFFF);   //æ®µåŸºå€çš„ä½16ä½é€»è¾‘ä¸ï¼Œå…¶ä»–ä½å…¨éƒ¨æ¸…é›¶
+    global_describe_table[indexs].base_middle  = (base >> 16) & 0xFF; //baseå…ˆå³åç§»æŠŠä½16å»æ‰ï¼Œå†é€»è¾‘ä¸8ä½ï¼Œå¾—åˆ°æ®µåŸºå€çš„ä¸­é—´8ä½
+    global_describe_table[indexs].base_high    = (base >> 24) & 0xFF; //baseå…ˆå³åç§»æŠŠä½24ä½å»æ‰ï¼Œå†é€»è¾‘ä¸8ä½ï¼Œå¾—åˆ°æ®µåŸºå€çš„é«˜8ä½ï¼Œè‡³æ­¤å®Œæˆäº†32ä½æ®µåŸºå€çš„åˆå§‹åŒ–
+    global_describe_table[indexs].limit_low    = (limit & 0xFFFF);  //æ®µç•Œé™ä½16ä½ä¿ç•™ï¼Œå…¶ä»–ä½å…¨éƒ¨æ¸…é›¶
+    global_describe_table[indexs].granularity  = (limit >> 16) & 0x0F; //granå‚æ•°é‡Œä½4ä½å‚¨å­˜æ˜¯æ®µç•Œé™å‰©ä¸‹4ä½ï¼Œç°åœ¨æ®µç•Œé™æŠŠä½16ä½ç»™å³åç§»å»æ‰ï¼Œå‰©ä¸‹4ä½å‚¨å­˜å†granularityçš„ä½4ä½é‡Œ
+    global_describe_table[indexs].granularity |= gran & 0xF0; //åªå–granå‚æ•°é‡Œçš„é«˜4ä½ï¼Œå› ä¸ºé«˜4ä½æ˜¯granularityè¦ç”¨çš„å€¼ï¼Œä½4ä½æ˜¯åˆšåˆšç»™æ®µç•Œé™ç”¨çš„
+    global_describe_table[indexs].access       = access_right; //æœ€åæŠŠ8ä½çš„(p,dpl,tpyeç­‰å­—æ®µ)èµ‹äºˆç»™accessæ®µï¼Œè‡³æ­¤gdtè¡¨ç»“æ„èµ‹äºˆè§„åˆ™æ„é€ å®Œæ¯•
 }
