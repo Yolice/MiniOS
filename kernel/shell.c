@@ -208,7 +208,7 @@ void command_execute(char* read_command)
 				put_str("Main thread will print 'A',Then there are two threads be created which print'B' and 'C'\n");
 				put_str("It will be print 'A' 'B' 'C' characters regularly due to timer device interrupt\n");
 				put_str("You can review the source code that uploaded in the Github ");
-			    put_str("URL:https://github.com/Yolice/MiniOS \n\n");
+			        put_str("URL:https://github.com/Yolice/MiniOS \n\n");
 				put_str("--------------------------------------end---------------------------------------\n");
 				return;
 			}
