@@ -14,5 +14,4 @@ char* strcat(char* dst_, const char* src_);
 uint32_t strchrs(const char* filename, uint8_t ch);
 
 
-
 #endif // !INCLUDE_STRING_H_

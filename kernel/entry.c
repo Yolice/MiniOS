@@ -4,7 +4,19 @@ char kern_stack[STACK_SIZE];  //主线程的内核栈
 
 uint32_t kern_stack_top;  //内核栈顶的地址
 
+uint8_t flag = 0;
 
+void thread_A()
+{
+	while (1)
+	{
+		if (flag == 1)
+		{
+			put_str("A");
+			flag = 0;
+		}
+	}
+}
 
 
 

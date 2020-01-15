@@ -5,7 +5,8 @@
 
 void timer_callback()  //今后用于基于时间中断的调度
 {
-	schedule();
+    schedule();
+	
 }
 
 void init_timer()
@@ -14,7 +15,7 @@ void init_timer()
     register_interrupt_handler(IRQ0, timer_callback); // 注册时间相关的处理函数
 
     // Intel 8253/8254 PIT芯片 I/O端口地址范围是40h~43h
-    uint32_t divisor = 1193180 / 200; // 输入频率为 1193180，frequency 即每秒中断次数
+    uint32_t divisor = 1193180 / 10; // 输入频率为 1193180，frequency 即每秒中断次数
 
     // D7 D6 D5 D4 D3 D2 D1 D0
     // 0  0  1  1  0  1  1  0

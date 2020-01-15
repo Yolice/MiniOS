@@ -44,6 +44,9 @@ int32_t create_thread(int (*fn)(void *), void *arg) // 内核线程创建
 	}
 	tail->next = new_thread; //最后一个线程，不再指向ready_thread_head头部地址而是指向新创建的线程。即新创建的线程加入了就绪态链表
 
+	//put_str("new_ thread pid is:");
+	//put_int(new_thread->pid);
+	//put_str("\n");
 
 	return new_thread->pid;  //返回新创建的线程的pid
 }
@@ -52,6 +55,7 @@ void kthread_exit()
 {
 	register uint32_t val asm ("eax");
     
+	put_str("thread_exit with value:");
 	put_hex(val);
 
 	while (1);

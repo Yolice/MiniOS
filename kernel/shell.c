@@ -1,7 +1,6 @@
-#include "shell.h"
 #include "init.h"
 
-
+int END_CODE = 8848;
 
 uint8_t buffer_flag = 0;
 
@@ -9,9 +8,70 @@ uint8_t continue_flag = 1;
 
 extern char recorded_command[100];
 
+extern int recorded_input[100];
+
 char* point = recorded_command;
 
+int* input_point = recorded_input;
 
+uint8_t input_flag = 1;
+
+uint8_t integer_flag = 0;
+
+uint8_t schedule_flag = 0;
+
+void thread_B()
+{
+	while (1)
+	{
+		if (schedule_flag == 1)
+		{
+			put_str("B");
+			schedule_flag = 2;
+		}
+	}
+}
+
+void thread_C()
+{
+	while (1)
+	{
+		if (schedule_flag == 2)
+		{
+			put_str("C");
+			schedule_flag = 0;
+		}
+	}
+}
+
+
+
+
+int get_integer()
+{
+    integer_flag = 1;
+	int i = 0;
+	int count = 0;
+	int integer = 0;
+	int operators = 1;
+
+	while(input_flag);
+
+	while (recorded_input[i++] !=END_CODE )
+	{
+		count++;
+	}
+	for (count--; count >= 0; count--)
+	{
+		integer = recorded_input[count] * operators + integer;
+		operators = operators * 10;
+	}
+
+
+	integer_flag = 0;
+	input_flag = 1;
+	return integer;
+}
 
 
 
@@ -89,6 +149,8 @@ void command_execute(char* read_command)
 	char* command_clear = "lear";
 	char* command_help = "elp";
 	char* command_memory = "emory";
+	char* command_bmi = "mi";
+	char* command_thread = "hread";
 
 	if (*read_command == '\n')
 	{
@@ -108,6 +170,30 @@ void command_execute(char* read_command)
 			}
 		}
 		break;
+	case 't':
+		++read_command;
+		while (*read_command++ == *command_thread++)
+		{
+			if (*read_command == '\n' && *command_thread == NULL)
+			{
+				put_str("running thread demo....\n");
+				put_str("main thread pid is:");
+				put_int(current->pid);
+				put_str("\n");
+				create_thread(thread_B, NULL);
+				create_thread(thread_C, NULL);
+				while (1)
+				{
+					if (schedule_flag == 0)
+					{
+						put_str("A");
+						schedule_flag = 1;
+					}
+				}
+				return;
+			}
+		}
+		break;
 	case 'h':
 		++read_command;
 		while (*read_command++ == *command_help++)
@@ -116,9 +202,11 @@ void command_execute(char* read_command)
 			{
 				put_str("--------------------------------------info--------------------------------------\n");
 				put_str("Type command 'clear' will clean the shell screen\n");
-				put_str("Type command 'memory' can show memory allocate test which allocate memory size 4k per page\n");
-				put_str("This OS have schedule function which make kernel_thread and new_create_thread ");
-				put_str("schedule base on timer device.But it's not work on the shell \n");
+				put_str("Type command 'memory' can show memory allocate test which allocate memory size  4k per page\n");
+				put_str("Type command 'bmi' will execute bmi function which get height and weight value  that calculate bmi\n");
+				put_str("Type command 'thread' will show thread schedule function which base on timer device.");
+				put_str("Main thread will print 'A',Then there are two threads be created which print'B' and 'C'\n");
+				put_str("It will be print 'A' 'B' 'C' characters regularly due to timer device interrupt\n");
 				put_str("You can review the source code that uploaded in the Github ");
 			    put_str("URL:https://github.com/Yolice/MiniOS \n\n");
 				put_str("--------------------------------------end---------------------------------------\n");
@@ -137,10 +225,41 @@ void command_execute(char* read_command)
 			}
 		}
 		break;
+	case 'b':
+	    ++read_command;
+		while(*read_command++ == *command_bmi++)
+		{
+			if (*read_command == '\n' && *command_bmi == NULL)
+			{
+				put_str("Your weight(kg):");
+				int weight = get_integer();
+				put_str("\nYour height(cm):");
+				int height = get_integer();
+				int bmi = (weight*10000) / (height*height);
+				put_str("\nYour bmi is:");
+				put_int(bmi);
+				put_str("  Body status:");
+				if (bmi <= 18)
+				{
+					put_str(" Thin");
+				}
+				else if (bmi > 18 && bmi < 24)
+				{
+					put_str(" Normal");
+				}
+				else if (bmi > 24)
+				{
+					put_str(" Fat");
+				}
+				put_str("\n");
+				return;
+			}
+		}
+		break;
 	default:
 		break;
 	}
-
+	
 	read_command = local_command;
 
 	while (*read_command && *read_command != '\n')

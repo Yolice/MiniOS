@@ -140,6 +140,7 @@ void isr_handler(pt_regs *regs)
          put_str("!Interrput number: ");
 	     put_int(regs->int_no);
 		 put_str("\n");
+		 while (1); //停在此处
 
 	}
 }

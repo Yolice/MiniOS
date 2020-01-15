@@ -107,6 +107,11 @@ void put_str(uint8_t* str)
 
 void put_int(uint32_t value)  //最大范围unsigned int，超过会出错
 {
+	if (value == 0)
+	{
+		put_str("0");
+		return;
+	}
     unsigned char i,j=0;
     unsigned char backstr[11];  //int最多分解10位数
     unsigned char str[32];
@@ -116,9 +121,9 @@ void put_int(uint32_t value)  //最大范围unsigned int，超过会出错
 		value=value/10; //分解倒数第二位，以此类推
 		i++; //直到分解所有位
 	}
-	while(i) //因为刚刚是倒叙分解，此时倒叙添加数字
+	while (i) //因为刚刚是倒叙分解，此时倒叙添加数字
 	{
-	    str[j++]=backstr[--i];  //用--i是因为此时i指向了空的数字，i前一个才是value的最后一位数字
+		str[j++] = backstr[--i];  //用--i是因为此时i指向了空的数字，i前一个才是value的最后一位数字
 	}
 	str[j]='\0'; //c风格字符串的结尾
 	put_str(str);  //每个被分解的数字都是char类型
