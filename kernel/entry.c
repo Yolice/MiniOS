@@ -1,22 +1,11 @@
 #include "init.h"
 
-char kern_stack[STACK_SIZE];  //Ö÷Ïß³ÌµÄÄÚºËÕ»
+char kern_stack[STACK_SIZE];  //ä¸»çº¿ç¨‹çš„å†…æ ¸æ ˆ
 
-uint32_t kern_stack_top;  //ÄÚºËÕ»¶¥µÄµØÖ·
+uint32_t kern_stack_top;  //å†…æ ¸æ ˆé¡¶çš„åœ°å€
 
 uint8_t flag = 0;
 
-void thread_A()
-{
-	while (1)
-	{
-		if (flag == 1)
-		{
-			put_str("A");
-			flag = 0;
-		}
-	}
-}
 
 
 
@@ -24,9 +13,9 @@ void thread_A()
 int kern_entry()
 {
 	clear();
-	kern_stack_top = ((uint32_t)kern_stack + STACK_SIZE); // ÇĞ»»ÄÚºËÕ»
-	asm volatile ("mov %0, %%esp\n\t" : : "r" (kern_stack_top)); // esp¼ÓÔØkern_stack_topµØÖ·
-	asm volatile ("xor %ebp, %ebp"); //ebpÇåÁã
+	kern_stack_top = ((uint32_t)kern_stack + STACK_SIZE); // åˆ‡æ¢å†…æ ¸æ ˆ
+	asm volatile ("mov %0, %%esp\n\t" : : "r" (kern_stack_top)); // espåŠ è½½kern_stack_topåœ°å€
+	asm volatile ("xor %ebp, %ebp"); //ebpæ¸…é›¶
 	init_all();
 	enable_interrupt();
 	login_shell();
